@@ -1,3 +1,5 @@
+
+
 namespace Contacts_CLI;
 partial class Program
 {
@@ -9,4 +11,5 @@ partial class Program
     public string? email;
     public string? note;
   }
+  
 }
