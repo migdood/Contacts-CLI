@@ -75,4 +75,13 @@ partial class Program
     cmd.ExecuteNonQuery();
     con.Close();
   }
+  public static void DeleteContactQuery(int ID)
+  {
+    using var cmd = new SqliteCommand(@"DELETE FROM contacts 
+                                        WHERE id=@id", con);
+    cmd.Parameters.AddWithValue("@id", ID);
+    con.Open();
+    cmd.ExecuteNonQuery();
+    con.Close();
+  }
 }

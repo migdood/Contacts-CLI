@@ -5,20 +5,25 @@ using Spectre.Console.Cli;
 namespace Contacts_CLI;
 partial class Program
 {
+  // Game plan
+  // Create Delete Query + Command
+  // Delete from a multi-select prompt to the user which will have names
   public static int Main(string[] args)
   {
     try
     {
       EnsureDB();
 
-
       var app = new CommandApp();
+
       app.Configure(config =>
       {
-        config.AddCommand<AddSettingsCommand>("add");
         config.AddCommand<ListContactsCommand>("list");
         config.AddExample("list", "[Contacts]");
+        config.AddCommand<AddSettingsCommand>("add");
+        config.AddCommand<DeleteContactCommand>("delete");
       });
+
       return app.Run(args);
     }
     catch (CommandAppException CommandAppException)
@@ -40,23 +45,5 @@ partial class Program
       return 0;
     }
   }
-  public static void DisplayTable()
-  {
-    var table = new Table().Centered();
 
-    table.Title("Contacts List", Style.Plain);
-    table.AddColumns("ID", "Name", "Phone Number", "Email", "Note");
-
-    foreach (var item in ReadContactsQuery())
-    {
-      table.AddRow(
-        new Markup($"[yellow]{item.id}[/]").RightJustified(),
-        new Markup($"[yellow]{item.name}[/]"),
-        new Markup($"[yellow]{item.phone_number}[/]").RightJustified(),
-        new Markup($"[yellow]{item.email}[/]"),
-        new Markup($"[yellow]{item.note}[/]"));
-    }
-
-    AnsiConsole.Write(table);
-  }
 }
