@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Linq.Expressions;
 using Microsoft.Data.Sqlite;
 using Spectre.Console;
 
@@ -83,5 +84,53 @@ partial class Program
     con.Open();
     cmd.ExecuteNonQuery();
     con.Close();
+  }
+  public static void UpdateContactQuery(int ID, string? Name, int? PhoneNumber, string? Email, string? Note)
+  {
+    try
+    {
+      using var cmd = new SqliteCommand("UPDATE contacts SET ", con);
+
+      bool first = true;
+
+      if (!string.IsNullOrWhiteSpace(Name))
+      {
+        if (!first) cmd.CommandText += ", ";
+        cmd.CommandText += "name = @name";
+        cmd.Parameters.AddWithValue("@name", Name);
+        first = false;
+      }
+
+      if (PhoneNumber != null)
+      {
+        if (!first) cmd.CommandText += ", ";
+        cmd.CommandText += "phone_number = @phone_number";
+        cmd.Parameters.AddWithValue("@phone_number", PhoneNumber);
+        first = false;
+      }
+
+      if (!string.IsNullOrWhiteSpace(Email))
+      {
+        if (!first) cmd.CommandText += ", ";
+        cmd.CommandText += "email = @email";
+        cmd.Parameters.AddWithValue("@email", Email);
+        first = false;
+      }
+
+      if (!string.IsNullOrWhiteSpace(Note))
+      {
+        if (!first) cmd.CommandText += ", ";
+        cmd.CommandText += "note = @note";
+        cmd.Parameters.AddWithValue("@note", Note);
+        first = false;
+      }
+
+      cmd.CommandText += " WHERE id = @id;";
+      cmd.Parameters.AddWithValue("@id", ID);
+      con.Open();
+      cmd.ExecuteNonQuery();
+      con.Close();
+    }
+    catch { throw; }
   }
 }

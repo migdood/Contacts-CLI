@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using System.Runtime.InteropServices.Marshalling;
+using System.Linq.Expressions;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -48,8 +48,6 @@ partial class Program
     {
       try
       {
-        var font = FigletFont.Load("starwars.flf");
-        AnsiConsole.Write(new FigletText(font, "Contacts"));
         DisplayTable();
         return 0;
       }
@@ -71,6 +69,39 @@ partial class Program
       try
       {
         DeleteContactQuery(settings.ContactID);
+        AnsiConsole.MarkupLine("[bold green]Success![/]");
+        return 0;
+      }
+      catch { throw; }
+    }
+  }
+  #endregion
+
+  #region Update
+  public class UpdateSettings : CommandSettings
+  {
+    [CommandArgument(0, "<ID>")]
+    public int ID { get; set; }
+
+    [CommandOption("-n|--name <name>")]
+    public string? Name { get; set; }
+
+    [CommandOption("-p|--phone <phone-number>")]
+    public int PhoneNumber { get; set; }
+
+    [CommandOption("-e|--email <email>")]
+    public string? Email { get; set; }
+
+    [CommandOption("-s|--note <note>")]
+    public string? Note { get; set; }
+  }
+  public class UpdateContactCommand : Command<UpdateSettings>
+  {
+    public override int Execute(CommandContext context, UpdateSettings contact)
+    {
+      try
+      {
+        UpdateContactQuery(contact.ID, contact.Name, contact.PhoneNumber, contact.Email, contact.Note);
         AnsiConsole.MarkupLine("[bold green]Success![/]");
         return 0;
       }

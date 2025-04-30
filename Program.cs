@@ -5,9 +5,6 @@ using Spectre.Console.Cli;
 namespace Contacts_CLI;
 partial class Program
 {
-  // Game plan
-  // Create Delete Query + Command
-  // Delete from a multi-select prompt to the user which will have names
   public static int Main(string[] args)
   {
     try
@@ -18,10 +15,12 @@ partial class Program
 
       app.Configure(config =>
       {
+        //TODO: Add Search, UPdate, Pagination, and don't show the ID except when deleting, Add ways of sorting
         config.AddCommand<ListContactsCommand>("list");
         config.AddExample("list", "[Contacts]");
         config.AddCommand<AddSettingsCommand>("add");
         config.AddCommand<DeleteContactCommand>("delete");
+        config.AddCommand<UpdateContactCommand>("update");
       });
 
       return app.Run(args);
