@@ -42,7 +42,7 @@ partial class Program
         {
           id = int.Parse(reader[0].ToString()!),
           name = reader[1].ToString(),
-          phone_number = (int?)long.Parse(reader[2].ToString()!),
+          phone_number = reader[2].ToString(),
           email = reader[3].ToString(),
           note = reader[4].ToString()
         };
@@ -55,7 +55,7 @@ partial class Program
       throw;
     }
   }
-  public static void AddContactsQuery(string name, long phone_number, string email, string note)
+  public static void AddContactsQuery(string name, string phone_number, string email, string note)
   {
     using var cmd = new SqliteCommand(@"
                                       INSERT INTO contacts(
@@ -85,7 +85,7 @@ partial class Program
     cmd.ExecuteNonQuery();
     con.Close();
   }
-  public static void UpdateContactQuery(int ID, string? Name, int? PhoneNumber, string? Email, string? Note)
+  public static void UpdateContactQuery(int ID, string? Name, string? PhoneNumber, string? Email, string? Note)
   {
     try
     {

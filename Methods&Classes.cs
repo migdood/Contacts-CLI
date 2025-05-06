@@ -7,7 +7,7 @@ partial class Program
   {
     public int? id;
     public string? name;
-    public int? phone_number;
+    public string? phone_number;
     public string? email;
     public string? note;
   }

@@ -14,7 +14,7 @@ partial class Program
     public required string Name { get; set; }
 
     [CommandArgument(1, "<number>")]
-    public long PhoneNumber { get; set; }
+    public required string PhoneNumber { get; set; }
 
     [CommandOption("-e|--email <email>")]
     [DefaultValue("-")]
@@ -87,7 +87,7 @@ partial class Program
     public string? Name { get; set; }
 
     [CommandOption("-p|--phone <phone-number>")]
-    public int PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
 
     [CommandOption("-e|--email <email>")]
     public string? Email { get; set; }
