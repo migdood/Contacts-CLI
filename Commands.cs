@@ -109,4 +109,30 @@ partial class Program
     }
   }
   #endregion
+
+  #region Sorting
+  // public class SortingSettings : CommandSettings
+  // {
+  //   [CommandArgument(0, "<Sorting_Order>")]
+  //   public required string Order { get; set; }
+  // }
+  public class SortingCommand : Command
+  {
+    public override int Execute(CommandContext context)
+    {
+      try
+      {
+        var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
+          .Title("Select the sorting order you want.")
+          .PageSize(10)
+          .AddChoices(["Ascending", "Descending", "Name", "Number", "Email"]));
+        SortOrder(choice);
+        AnsiConsole.MarkupLineInterpolated($"[yellow]{choice}[/] order style will be used from now on.");
+
+        return 0;
+      }
+      catch { throw; }
+    }
+  }
+  #endregion
 }

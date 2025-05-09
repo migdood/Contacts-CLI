@@ -15,12 +15,13 @@ partial class Program
 
       app.Configure(config =>
       {
-        //TODO: Add Search, UPdate, Pagination, and don't show the ID except when deleting, Add ways of sorting
+        //TODO: Add Search, Pagination, and don't show the ID except when deleting, Add ways of sorting
         config.AddCommand<ListContactsCommand>("list");
         config.AddExample("list", "[Contacts]");
         config.AddCommand<AddSettingsCommand>("add");
         config.AddCommand<DeleteContactCommand>("delete");
         config.AddCommand<UpdateContactCommand>("update");
+        config.AddCommand<SortingCommand>("sort");
       });
 
       return app.Run(args);

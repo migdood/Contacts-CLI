@@ -25,10 +25,12 @@ partial class Program
   }
   public static List<ReadAllContactsDB> ReadContactsQuery()
   {
+    string? order = null;
     try
     {
       List<ReadAllContactsDB> DBList = [];
-      var cmd = new SqliteCommand(@"SELECT * FROM contacts;", con);
+      var cmd = new SqliteCommand(@"SELECT * FROM contacts order by @order;", con);
+      cmd.Parameters.AddWithValue("@order", order ?? "name");
       con.Open();
       SqliteDataReader reader = cmd.ExecuteReader();
       if (!reader.HasRows)
@@ -127,6 +129,18 @@ partial class Program
 
       cmd.CommandText += " WHERE id = @id;";
       cmd.Parameters.AddWithValue("@id", ID);
+      con.Open();
+      cmd.ExecuteNonQuery();
+      con.Close();
+    }
+    catch { throw; }
+  }
+  public static void SortOrder(string Choice)
+  {
+    try
+    {
+      using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'sort order';", con);
+      cmd.Parameters.AddWithValue("@option", Choice);
       con.Open();
       cmd.ExecuteNonQuery();
       con.Close();
