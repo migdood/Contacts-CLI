@@ -1,5 +1,3 @@
-using System.Data.Common;
-using System.Linq.Expressions;
 using Microsoft.Data.Sqlite;
 using Spectre.Console;
 
@@ -23,14 +21,27 @@ partial class Program
       AnsiConsole.MarkupLine("[bold yellow]Database not found.\nCreated new one.\n\n[/]");
     con.Close();
   }
+
   public static List<ReadAllContactsDB> ReadContactsQuery()
   {
-    string? order = null;
+    string? order;
+    List<ReadAllContactsDB> DBList = [];
     try
     {
-      List<ReadAllContactsDB> DBList = [];
-      var cmd = new SqliteCommand(@"SELECT * FROM contacts order by @order;", con);
-      cmd.Parameters.AddWithValue("@order", order ?? "name");
+      using var cmd2 = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'Sort Order';", con);
+      con.Open();
+      var reader2 = cmd2.ExecuteReader();
+      reader2.Read();
+      if (!reader2.HasRows)
+      {
+        AnsiConsole.MarkupLine("[bold red]Please select a sorting style.[/]");
+        return DBList;
+      }
+      order = reader2[0].ToString();
+      AnsiConsole.WriteLine($"The order is: {order}");
+      con.Close();
+
+      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {order};", con);
       con.Open();
       SqliteDataReader reader = cmd.ExecuteReader();
       if (!reader.HasRows)
@@ -50,12 +61,10 @@ partial class Program
         };
         DBList.Add(contact);
       }
+      con.Close();
       return DBList;
     }
-    catch
-    {
-      throw;
-    }
+    catch { throw; }
   }
   public static void AddContactsQuery(string name, string phone_number, string email, string note)
   {
@@ -139,7 +148,7 @@ partial class Program
   {
     try
     {
-      using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'sort order';", con);
+      using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'Sort Order';", con);
       cmd.Parameters.AddWithValue("@option", Choice);
       con.Open();
       cmd.ExecuteNonQuery();

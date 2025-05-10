@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Linq.Expressions;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -41,10 +40,9 @@ partial class Program
   #endregion
 
   #region List
-  public class ListContactsSettings : CommandSettings { }
-  public class ListContactsCommand : Command<ListContactsSettings>
+  public class ListContactsCommand : Command
   {
-    public override int Execute(CommandContext context, ListContactsSettings settings)
+    public override int Execute(CommandContext context)
     {
       try
       {
@@ -111,23 +109,26 @@ partial class Program
   #endregion
 
   #region Sorting
-  // public class SortingSettings : CommandSettings
-  // {
-  //   [CommandArgument(0, "<Sorting_Order>")]
-  //   public required string Order { get; set; }
-  // }
   public class SortingCommand : Command
   {
     public override int Execute(CommandContext context)
     {
       try
       {
-        var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
-          .Title("Select the sorting order you want.")
+        Dictionary<string, string> OrderDict = new(){
+          {"Latest","ID"},
+          {"Name","Name"},
+          {"Number","Phone_Number"},
+          {"Email","Email"}
+        };
+
+        var SelectedOrder = AnsiConsole.Prompt(new SelectionPrompt<string>()
+          .Title("Select the sorting style you want.")
           .PageSize(10)
-          .AddChoices(["Ascending", "Descending", "Name", "Number", "Email"]));
-        SortOrder(choice);
-        AnsiConsole.MarkupLineInterpolated($"[yellow]{choice}[/] order style will be used from now on.");
+          .AddChoices(["Latest", "Name", "Number", "Email"]));
+
+        SortOrder(OrderDict[SelectedOrder]);
+        AnsiConsole.MarkupLineInterpolated($"[yellow]{SelectedOrder}[/] sorting style will be used from now on.");
 
         return 0;
       }

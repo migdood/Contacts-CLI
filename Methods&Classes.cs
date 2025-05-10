@@ -14,20 +14,24 @@ partial class Program
 
   public static void DisplayTable()
   {
-    var table = new Table().Centered();
-
-    table.Title("Contacts List", Style.Plain);
-    table.AddColumns("ID", "Name", "Phone Number", "Email", "Note");
-
-    foreach (var item in ReadContactsQuery())
+    try
     {
-      table.AddRow(
-        new Markup($"[yellow]{item.id}[/]").RightJustified(),
-        new Markup($"[yellow]{item.name}[/]"),
-        new Markup($"[yellow]{item.phone_number}[/]").RightJustified(),
-        new Markup($"[yellow]{item.email}[/]"),
-        new Markup($"[yellow]{item.note}[/]"));
+      var table = new Table().Centered();
+
+      table.Title("Contacts List", Style.Plain);
+      table.AddColumns("ID", "Name", "Phone Number", "Email", "Note").Width(110);
+
+      foreach (var item in ReadContactsQuery())
+      {
+        table.AddRow(
+          new Markup($"[yellow]{item.id}[/]").RightJustified(),
+          new Markup($"[yellow]{item.name}[/]"),
+          new Markup($"[yellow]{item.phone_number}[/]").RightJustified(),
+          new Markup($"[yellow]{item.email}[/]"),
+          new Markup($"[yellow]{item.note}[/]"));
+      }
+      AnsiConsole.Write(table);
     }
-    AnsiConsole.Write(table);
+    catch { throw; }
   }
 }
