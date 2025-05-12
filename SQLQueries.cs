@@ -38,10 +38,9 @@ partial class Program
         return DBList;
       }
       order = reader2[0].ToString();
-      AnsiConsole.WriteLine($"The order is: {order}");
       con.Close();
 
-      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {order};", con);
+      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {order} LIMIT {15} OFFSET {0};", con);
       con.Open();
       SqliteDataReader reader = cmd.ExecuteReader();
       if (!reader.HasRows)
@@ -68,7 +67,7 @@ partial class Program
   }
   public static void AddContactsQuery(string name, string phone_number, string email, string note)
   {
-    using var cmd = new SqliteCommand(@"
+    var cmd = new SqliteCommand(@"
                                       INSERT INTO contacts(
                                       name,
                                       phone_number,
