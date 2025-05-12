@@ -50,7 +50,7 @@ partial class Program
     {
       try
       {
-        DisplayTable(settings.OFFSET);
+        DisplayTable(settings.OFFSET, ReadContactsQuery(settings.OFFSET));
         return 0;
       }
       catch { throw; }
@@ -154,6 +154,17 @@ partial class Program
                   .AddChoices(["Ascending", "Descending"]));
         UpdateAscendingOrder(OrderDict2[order]);
         AnsiConsole.MarkupLineInterpolated($"[yellow]{order}[/] order will be used from now on.");
+
+        Dictionary<string, bool> OrderDict3 = new(){
+          {"True",true},
+          {"False",false},
+        };
+        var SeparateRows = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                  .Title("Would you like to separate the rows?")
+                  .PageSize(10)
+                  .AddChoices(["True", "False"]));
+        UpdateSeparateRows(OrderDict3[SeparateRows]);
+        AnsiConsole.MarkupLineInterpolated($"Displaying Row Separators is set to [yellow]{SeparateRows}[/]");
 
         return 0;
       }
@@ -399,8 +410,21 @@ partial class Program
   #region Search
   public class SearchSettings : CommandSettings
   {
+    [CommandOption("-t|--type <name_or_email>")]
+    [DefaultValue("name")]
+    public required string Type { get; set; }
+    public override ValidationResult Validate()
+    {
+      return Type == "name" || Type == "email"
+      ? ValidationResult.Success()
+      : ValidationResult.Error("Type must be either name or email.");
+    }
+
     [CommandArgument(0, "<SearchTerm>")]
     public required string SearchTerm { get; set; }
+    [CommandOption("-o|--offset")]
+    [DefaultValue(0)]
+    public int OFFSET { get; set; }
   }
 
   public class SearchCommand : Command<SearchSettings>
@@ -409,7 +433,7 @@ partial class Program
     {
       try
       {
-        AnsiConsole.MarkupLine("[bold blue]WIP[/]");
+        DisplayTable(settings.OFFSET, SearchContactsQuery(settings.OFFSET, settings.Type, settings.SearchTerm));
         return 0;
       }
       catch { throw; }

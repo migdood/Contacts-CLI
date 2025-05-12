@@ -89,7 +89,42 @@ partial class Program
     cmd.ExecuteNonQuery();
     con.Close();
   }
-  
+  public static List<ReadAllContactsDB> SearchContactsQuery(int OFFSET, string Type, string SearchTerm)
+  {
+    List<ReadAllContactsDB> DBList = [];
+    try
+    {
+      string SortOrder = FetchSortOrder()!;
+      string OrderDirection = FetchOrderDirection()!;
+      int Limit = FetchLimit();
+
+      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts WHERE {Type} LIKE '%{SearchTerm}%' ORDER BY {SortOrder} {OrderDirection} LIMIT {Limit} OFFSET {OFFSET * Limit};", con);
+
+      con.Open();
+      SqliteDataReader reader = cmd.ExecuteReader();
+      if (!reader.HasRows)
+      {
+        AnsiConsole.MarkupLine("[bold red]No Results Found[/]");
+        return DBList;
+      }
+      while (reader.Read())
+      {
+        ReadAllContactsDB contact = new()
+        {
+          id = int.Parse(reader[0].ToString()!),
+          name = reader[1].ToString(),
+          phone_number = reader[2].ToString(),
+          email = reader[3].ToString(),
+          note = reader[4].ToString()
+        };
+        DBList.Add(contact);
+      }
+      con.Close();
+      return DBList;
+    }
+    catch { throw; }
+  }
+
   #region  Fetch
   // Limit
   public static int FetchLimit()
@@ -163,6 +198,20 @@ partial class Program
 
   }
 
+  public static bool FetchRowSeparator()
+  {
+    using var cmd = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'Row Separator'", con);
+    con.Open();
+    var reader = cmd.ExecuteReader();
+    reader.Read();
+    if (!reader.HasRows)
+    {
+      AnsiConsole.MarkupLine("[bold red]Failed to fetch Row Separator data, false by default.[/]");
+      return false;
+    }
+    int intValue = reader.GetInt32(reader.GetOrdinal("option1"));
+    return intValue != 0;
+  }
   #endregion
 
   #region  Update
@@ -232,6 +281,17 @@ partial class Program
     {
       using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'AscDesc';", con);
       cmd.Parameters.AddWithValue("@option", Choice);
+      con.Open();
+      cmd.ExecuteNonQuery();
+      con.Close();
+    }
+    catch { throw; }
+  }
+  public static void UpdateSeparateRows(bool Choice)
+  {
+    try
+    {
+      using var cmd = new SqliteCommand($"UPDATE settings SET option1 = {Choice} WHERE name = 'Row Separator';", con);
       con.Open();
       cmd.ExecuteNonQuery();
       con.Close();

@@ -12,16 +12,18 @@ partial class Program
     public string? note;
   }
 
-  public static void DisplayTable(int OFFSET)
+  public static void DisplayTable(int OFFSET, List<ReadAllContactsDB> ListQuery)
   {
     try
     {
+      bool SeparateRows = FetchRowSeparator();
       var table = new Table().Centered();
 
       table.Title("Contacts List", Style.Plain);
-      table.AddColumns("ID", "Name", "Phone Number", "Email", "Note").Width(110);
-
-      foreach (var item in ReadContactsQuery(OFFSET))
+      table.AddColumns("ID", "Name", "Phone Number", "Email", "Note").Width(110).ShowRowSeparators = SeparateRows;
+      if (ListQuery.Count <= 0)
+        return;
+      foreach (var item in ListQuery)
       {
         table.AddRow(
           new Markup($"[yellow]{item.id}[/]").RightJustified(),
