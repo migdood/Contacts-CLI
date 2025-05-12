@@ -22,7 +22,75 @@ partial class Program
       AnsiConsole.MarkupLine("[bold yellow]Database not found.\nCreated new one.\n\n[/]");
     con.Close();
   }
+
+  public static List<ReadAllContactsDB> ReadContactsQuery(int OFFSET)
+  {
+    List<ReadAllContactsDB> DBList = [];
+    try
+    {
+      string SortOrder = FetchSortOrder()!;
+      string OrderDirection = FetchOrderDirection()!;
+      int Limit = FetchLimit();
+
+      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {SortOrder} {OrderDirection} LIMIT {Limit} OFFSET {OFFSET * Limit};", con);
+
+      con.Open();
+      SqliteDataReader reader = cmd.ExecuteReader();
+      if (!reader.HasRows)
+      {
+        AnsiConsole.MarkupLine("[bold red]No Rows Found[/]");
+        return DBList;
+      }
+      while (reader.Read())
+      {
+        ReadAllContactsDB contact = new()
+        {
+          id = int.Parse(reader[0].ToString()!),
+          name = reader[1].ToString(),
+          phone_number = reader[2].ToString(),
+          email = reader[3].ToString(),
+          note = reader[4].ToString()
+        };
+        DBList.Add(contact);
+      }
+      con.Close();
+      return DBList;
+    }
+    catch { throw; }
+  }
+
+  public static void AddContactsQuery(string name, string phone_number, string email, string note)
+  {
+    var cmd = new SqliteCommand(@"
+                                      INSERT INTO contacts(
+                                      name,
+                                      phone_number,
+                                      email,
+                                      note)
+                                      VALUES(
+                                      @name,
+                                      @phone_number,
+                                      @email,
+                                      @note)", con);
+    cmd.Parameters.AddWithValue("@name", name);
+    cmd.Parameters.AddWithValue("@phone_number", phone_number);
+    cmd.Parameters.AddWithValue("@email", email);
+    cmd.Parameters.AddWithValue("@note", note);
+    con.Open();
+    cmd.ExecuteNonQuery();
+    con.Close();
+  }
+  public static void DeleteContactQuery(int ID)
+  {
+    using var cmd = new SqliteCommand(@"DELETE FROM contacts 
+                                        WHERE id=@id", con);
+    cmd.Parameters.AddWithValue("@id", ID);
+    con.Open();
+    cmd.ExecuteNonQuery();
+    con.Close();
+  }
   
+  #region  Fetch
   // Limit
   public static int FetchLimit()
   {
@@ -88,78 +156,16 @@ partial class Program
       AnsiConsole.MarkupLine("[bold red]Failed to get a count of the pages from DB.[/]");
       return null;
     }
-    PageCount = int.Parse(reader[0].ToString()!) /FetchLimit();
+    PageCount = int.Parse(reader[0].ToString()!) / FetchLimit();
     con.Close();
 
     return $"Page: {OFFSET}/{PageCount}";
 
   }
-  public static List<ReadAllContactsDB> ReadContactsQuery(int OFFSET)
-  {
-    List<ReadAllContactsDB> DBList = [];
-    try
-    {
-      string SortOrder = FetchSortOrder()!;
-      string OrderDirection = FetchOrderDirection()!;
-      int Limit = FetchLimit();
 
-      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {SortOrder} {OrderDirection} LIMIT {Limit} OFFSET {OFFSET * Limit};", con);
+  #endregion
 
-      con.Open();
-      SqliteDataReader reader = cmd.ExecuteReader();
-      if (!reader.HasRows)
-      {
-        AnsiConsole.MarkupLine("[bold red]No Rows Found[/]");
-        return DBList;
-      }
-      while (reader.Read())
-      {
-        ReadAllContactsDB contact = new()
-        {
-          id = int.Parse(reader[0].ToString()!),
-          name = reader[1].ToString(),
-          phone_number = reader[2].ToString(),
-          email = reader[3].ToString(),
-          note = reader[4].ToString()
-        };
-        DBList.Add(contact);
-      }
-      con.Close();
-      return DBList;
-    }
-    catch { throw; }
-  }
-  
-  public static void AddContactsQuery(string name, string phone_number, string email, string note)
-  {
-    var cmd = new SqliteCommand(@"
-                                      INSERT INTO contacts(
-                                      name,
-                                      phone_number,
-                                      email,
-                                      note)
-                                      VALUES(
-                                      @name,
-                                      @phone_number,
-                                      @email,
-                                      @note)", con);
-    cmd.Parameters.AddWithValue("@name", name);
-    cmd.Parameters.AddWithValue("@phone_number", phone_number);
-    cmd.Parameters.AddWithValue("@email", email);
-    cmd.Parameters.AddWithValue("@note", note);
-    con.Open();
-    cmd.ExecuteNonQuery();
-    con.Close();
-  }
-  public static void DeleteContactQuery(int ID)
-  {
-    using var cmd = new SqliteCommand(@"DELETE FROM contacts 
-                                        WHERE id=@id", con);
-    cmd.Parameters.AddWithValue("@id", ID);
-    con.Open();
-    cmd.ExecuteNonQuery();
-    con.Close();
-  }
+  #region  Update
   public static void UpdateContactQuery(int ID, string? Name, string? PhoneNumber, string? Email, string? Note)
   {
     try
@@ -232,4 +238,5 @@ partial class Program
     }
     catch { throw; }
   }
+  #endregion
 }

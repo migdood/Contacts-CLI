@@ -15,13 +15,14 @@ partial class Program
 
       app.Configure(config =>
       {
-        //TODO: Add Search, Pagination,Favorite Contacts, Row separator option into settings table
+        //TODO: Add Search,Favorite Contacts, Row separator option into settings table
         config.AddCommand<ListContactsCommand>("list");
         config.AddCommand<AddSettingsCommand>("add");
-        config.AddExample("add", "Marcus","187657484");
+        config.AddExample("add", "Marcus", "187657484");
         config.AddCommand<DeleteContactCommand>("delete");
-        config.AddExample("delete","42");
+        config.AddExample("delete", "42");
         config.AddCommand<UpdateContactCommand>("update");
+        config.AddCommand<SearchCommand>("search");
         config.AddCommand<SortingCommand>("sort");
         config.AddCommand<RandomContacts>("ran");
       });

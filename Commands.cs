@@ -118,6 +118,10 @@ partial class Program
     [CommandOption("-o|--order")]
     [DefaultValue("-")]
     public string? AscDesc { get; set; }
+
+    [CommandOption("-r|--row-separator")]
+    [DefaultValue(false)]
+    public bool SeparateRows { get; set; }
   }
   public class SortingCommand : Command<SortingSettings>
   {
@@ -392,7 +396,24 @@ partial class Program
 
   #endregion
 
-  #region Hero
+  #region Search
+  public class SearchSettings : CommandSettings
+  {
+    [CommandArgument(0, "<SearchTerm>")]
+    public required string SearchTerm { get; set; }
+  }
 
+  public class SearchCommand : Command<SearchSettings>
+  {
+    public override int Execute(CommandContext context, SearchSettings settings)
+    {
+      try
+      {
+        AnsiConsole.MarkupLine("[bold blue]WIP[/]");
+        return 0;
+      }
+      catch { throw; }
+    }
+  }
   #endregion
 }
