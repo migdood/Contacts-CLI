@@ -15,7 +15,7 @@ partial class Program
 
       app.Configure(config =>
       {
-        //TODO: Add Search, Pagination, Row separator option into settings table
+        //TODO: Add Search, Pagination,Favorite Contacts, Row separator option into settings table
         config.AddCommand<ListContactsCommand>("list");
         config.AddCommand<AddSettingsCommand>("add");
         config.AddExample("add", "Marcus","187657484");

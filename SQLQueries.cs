@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Data.Sqlite;
 using Spectre.Console;
 
@@ -21,26 +22,89 @@ partial class Program
       AnsiConsole.MarkupLine("[bold yellow]Database not found.\nCreated new one.\n\n[/]");
     con.Close();
   }
+  
+  // Limit
+  public static int FetchLimit()
+  {
+    int limit;
 
-  public static List<ReadAllContactsDB> ReadContactsQuery()
+    using var cmd = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'Pagination';", con);
+    con.Open();
+    var reader = cmd.ExecuteReader();
+    reader.Read();
+    if (!reader.HasRows)
+    {
+      AnsiConsole.MarkupLine("[bold red]Database error, no limit selected.[/]");
+      return -1;
+    }
+    limit = int.Parse(reader[0].ToString()!);
+    con.Close();
+    return limit;
+  }
+  // Order Direction
+  public static string? FetchOrderDirection(string? AscDesc = "ASC")
+  {
+    using var cmd = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'AscDesc';", con);
+    con.Open();
+    var reader = cmd.ExecuteReader();
+    reader.Read();
+    if (!reader.HasRows)
+    {
+      AnsiConsole.MarkupLine("[bold red]Database error, no order of ascending / descending selected.[/]");
+      return "";
+    }
+    AscDesc = reader[0].ToString();
+    con.Close();
+    return AscDesc;
+  }
+  // Sort Order
+  public static string? FetchSortOrder()
   {
     string? order;
+    using var cmd = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'Sort Order';", con);
+    con.Open();
+    var reader = cmd.ExecuteReader();
+    reader.Read();
+    if (!reader.HasRows)
+    {
+      AnsiConsole.MarkupLine("[bold red]Please select a sorting style.[/]");
+      return "";
+    }
+    order = reader[0].ToString();
+    con.Close();
+    return order;
+  }
+  // Page Count
+  public static string? FetchPageCount(int OFFSET)
+  {
+    int PageCount;
+    using var cmd = new SqliteCommand("SELECT COUNT(*) FROM contacts;", con);
+
+    con.Open();
+    var reader = cmd.ExecuteReader();
+    reader.Read();
+    if (!reader.HasRows)
+    {
+      AnsiConsole.MarkupLine("[bold red]Failed to get a count of the pages from DB.[/]");
+      return null;
+    }
+    PageCount = int.Parse(reader[0].ToString()!) /FetchLimit();
+    con.Close();
+
+    return $"Page: {OFFSET}/{PageCount}";
+
+  }
+  public static List<ReadAllContactsDB> ReadContactsQuery(int OFFSET)
+  {
     List<ReadAllContactsDB> DBList = [];
     try
     {
-      using var cmd2 = new SqliteCommand("SELECT option1 FROM settings WHERE name = 'Sort Order';", con);
-      con.Open();
-      var reader2 = cmd2.ExecuteReader();
-      reader2.Read();
-      if (!reader2.HasRows)
-      {
-        AnsiConsole.MarkupLine("[bold red]Please select a sorting style.[/]");
-        return DBList;
-      }
-      order = reader2[0].ToString();
-      con.Close();
+      string SortOrder = FetchSortOrder()!;
+      string OrderDirection = FetchOrderDirection()!;
+      int Limit = FetchLimit();
 
-      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {order} LIMIT {15} OFFSET {0};", con);
+      using var cmd = new SqliteCommand(@$"SELECT * FROM contacts ORDER BY {SortOrder} {OrderDirection} LIMIT {Limit} OFFSET {OFFSET * Limit};", con);
+
       con.Open();
       SqliteDataReader reader = cmd.ExecuteReader();
       if (!reader.HasRows)
@@ -65,6 +129,7 @@ partial class Program
     }
     catch { throw; }
   }
+  
   public static void AddContactsQuery(string name, string phone_number, string email, string note)
   {
     var cmd = new SqliteCommand(@"
@@ -143,11 +208,23 @@ partial class Program
     }
     catch { throw; }
   }
-  public static void SortOrder(string Choice)
+  public static void UpdateSortOrder(string Choice)
   {
     try
     {
       using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'Sort Order';", con);
+      cmd.Parameters.AddWithValue("@option", Choice);
+      con.Open();
+      cmd.ExecuteNonQuery();
+      con.Close();
+    }
+    catch { throw; }
+  }
+  public static void UpdateAscendingOrder(string Choice)
+  {
+    try
+    {
+      using var cmd = new SqliteCommand("UPDATE settings SET option1 = @option WHERE name = 'AscDesc';", con);
       cmd.Parameters.AddWithValue("@option", Choice);
       con.Open();
       cmd.ExecuteNonQuery();

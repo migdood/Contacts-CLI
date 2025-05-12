@@ -12,7 +12,7 @@ partial class Program
     public string? note;
   }
 
-  public static void DisplayTable()
+  public static void DisplayTable(int OFFSET)
   {
     try
     {
@@ -21,7 +21,7 @@ partial class Program
       table.Title("Contacts List", Style.Plain);
       table.AddColumns("ID", "Name", "Phone Number", "Email", "Note").Width(110);
 
-      foreach (var item in ReadContactsQuery())
+      foreach (var item in ReadContactsQuery(OFFSET))
       {
         table.AddRow(
           new Markup($"[yellow]{item.id}[/]").RightJustified(),
@@ -31,6 +31,7 @@ partial class Program
           new Markup($"[yellow]{item.note}[/]"));
       }
       AnsiConsole.Write(table);
+      AnsiConsole.WriteLine(FetchPageCount(OFFSET)!);
     }
     catch { throw; }
   }

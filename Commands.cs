@@ -1,4 +1,3 @@
-using System.CodeDom.Compiler;
 using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -7,8 +6,7 @@ namespace Contacts_CLI;
 partial class Program
 {
   #region  Add
-  public class AddSettings : CommandSettings { }
-  public class AddContactSettings : AddSettings
+  public class AddContactSettings : CommandSettings
   {
     [CommandArgument(0, "<name>")]
     public required string Name { get; set; }
@@ -16,13 +14,12 @@ partial class Program
     [CommandArgument(1, "<number>")]
     public required string PhoneNumber { get; set; }
 
-    [CommandOption("-e|--email <email>")]
+    [CommandOption("-e|--email")]
     [DefaultValue("-")]
     public required string Email { get; set; }
 
-    [CommandOption("-n|--note <note>")]
+    [CommandOption("-n|--note")]
     [DefaultValue("-")]
-
     public required string Note { get; set; }
   }
   public class AddSettingsCommand : Command<AddContactSettings>
@@ -41,13 +38,19 @@ partial class Program
   #endregion
 
   #region List
-  public class ListContactsCommand : Command
+  public class ListContactsSettings : CommandSettings
   {
-    public override int Execute(CommandContext context)
+    [CommandOption("-o|--offset")]
+    [DefaultValue(0)]
+    public int OFFSET { get; set; }
+  }
+  public class ListContactsCommand : Command<ListContactsSettings>
+  {
+    public override int Execute(CommandContext context, ListContactsSettings settings)
     {
       try
       {
-        DisplayTable();
+        DisplayTable(settings.OFFSET);
         return 0;
       }
       catch { throw; }
@@ -82,16 +85,16 @@ partial class Program
     [CommandArgument(0, "<ID>")]
     public int ID { get; set; }
 
-    [CommandOption("-n|--name <name>")]
+    [CommandOption("-n|--name")]
     public string? Name { get; set; }
 
     [CommandOption("-p|--phone <phone-number>")]
     public string? PhoneNumber { get; set; }
 
-    [CommandOption("-e|--email <email>")]
+    [CommandOption("-e|--email")]
     public string? Email { get; set; }
 
-    [CommandOption("-s|--note <note>")]
+    [CommandOption("-s|--note")]
     public string? Note { get; set; }
   }
   public class UpdateContactCommand : Command<UpdateSettings>
@@ -110,9 +113,15 @@ partial class Program
   #endregion
 
   #region Sorting
-  public class SortingCommand : Command
+  public class SortingSettings : CommandSettings
   {
-    public override int Execute(CommandContext context)
+    [CommandOption("-o|--order")]
+    [DefaultValue("-")]
+    public string? AscDesc { get; set; }
+  }
+  public class SortingCommand : Command<SortingSettings>
+  {
+    public override int Execute(CommandContext context, SortingSettings settings)
     {
       try
       {
@@ -128,8 +137,19 @@ partial class Program
           .PageSize(10)
           .AddChoices(["Latest", "Name", "Number", "Email"]));
 
-        SortOrder(OrderDict[SelectedOrder]);
+        UpdateSortOrder(OrderDict[SelectedOrder]);
         AnsiConsole.MarkupLineInterpolated($"[yellow]{SelectedOrder}[/] sorting style will be used from now on.");
+
+        Dictionary<string, string> OrderDict2 = new(){
+          {"Ascending","ASC"},
+          {"Descending","DESC"},
+        };
+        var order = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                  .Title("Select the order you want.")
+                  .PageSize(10)
+                  .AddChoices(["Ascending", "Descending"]));
+        UpdateAscendingOrder(OrderDict2[order]);
+        AnsiConsole.MarkupLineInterpolated($"[yellow]{order}[/] order will be used from now on.");
 
         return 0;
       }
@@ -372,7 +392,7 @@ partial class Program
 
   #endregion
 
-  #region 
-  
+  #region Hero
+
   #endregion
 }
